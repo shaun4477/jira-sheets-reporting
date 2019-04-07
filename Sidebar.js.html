@@ -1,0 +1,104 @@
+<!-- Libraries -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/1.10.0/jquery-ui.min.js"></script>
+
+<!-- Custom JavaScript -->
+<script>
+
+function processLoginError(error) {
+  $("#jiraStatus").text("Not logged in to Jira");
+  $("#loginError").text(error);
+  $("#loginError").show();
+  $("#jiraLogin .content").css("max-height", function () { return this.scrollHeight + "px"; })      
+}
+
+function processLoginSuccess(result) {
+  $("#jiraStatus").text("Logged in to Jira instance " + result.instance + " as '" + result.name + "'");
+  $("#loginError").text("");
+  $("#loginError").hide();
+  $("#run").prop('disabled', false);
+}
+
+function testSavedLogin() {
+  // Test the saved login
+  google.script.run.withFailureHandler(processLoginError)
+                   .withSuccessHandler(processLoginSuccess)
+                   .testSavedLogin();
+}
+
+function submitLogin() {
+  google.script.run.withFailureHandler(processLoginError)
+                   .withSuccessHandler(processLoginSuccess)
+                   .testAndSaveLoginDetails(document.getElementById("user").value, 
+                                            document.getElementById("token").value, 
+                                            document.getElementById("instance").value);
+  return false;
+}
+
+function generateBoardList() {
+  google.script.run.withSuccessHandler(function(result) {
+    // If we're loading the board list for the first time by default
+    // choose the same boards we last reported on 
+    var default_checks = {};
+    if ($("#boardList input").length == 0) {
+      var last_board_ids = report_defaults.board_ids || [];
+      for (var i = 0; i < last_board_ids.length; i++)
+        default_checks[last_board_ids[i]] = 1;
+    }
+    
+    $("#boardList").html("");
+    
+    result.sort(function (a, b) { 
+      return a.name < b.name ? -1 : a.name == b.name ? 0 : 1;
+    }).forEach(function (e) {
+      $("#boardList").append("<input type='checkbox' value='" + e.id + "' " + (default_checks[e.id] ? "checked" : "") + ">" + e.name + "<br>");
+    });
+  }).getBoardList();
+}
+
+function runReport() {
+  var board_ids = $("#boardList input:checked").map(function () { return parseInt(this.value); }).get();
+  if (!board_ids.length) {
+    $("#reportError").text("No boards selected");
+    $("#reportError").show();
+    return;
+  }
+  
+  var report_params = {board_ids: board_ids, // [148, 158, 160, 119, 145, 157, 162, 156, 143], // board_ids, 
+                       sprint_count: parseInt($("#sprint_count").val()),
+                       use_cache: $("#use_cache").prop("checked"), 
+                       delete_old: $("#delete_old").prop("checked")};
+
+  google.script.run.withSuccessHandler(function(result) {
+    console.log("Got", result);
+  }).generateReport(report_params)    
+  
+  $("#reportError").text("");
+  $("#reportError").hide();
+}
+
+function toggleCollapsed() {
+  $(this).toggleClass("active");  
+  var content = this.nextElementSibling;
+  content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px";
+}
+
+// On page load.
+$(function() {
+  $("#run").prop('disabled', true);
+  
+  testSavedLogin();
+
+  // Hide the loading div
+  $('#loading').hide();
+    
+  $("#run").click(runReport);
+  
+  $("#submitLogin").click(submitLogin);
+
+  $("#refreshBoardList").click(generateBoardList);
+
+  $(".collapsible").click(toggleCollapsed);
+});
+
+</script>
