@@ -10,7 +10,7 @@ function findFieldBySchema(fields_by_id, schema) {
   for (var field_id in fields_by_id) {
     if (!fields_by_id.hasOwnProperty(field_id))
       continue;
-    if (fields_by_id[field_id].schema && 
+    if (fields_by_id[field_id].schema &&
         fields_by_id[field_id].schema.custom == schema)
       return fields_by_id[field_id];
   }
@@ -613,8 +613,7 @@ var ReportRunner = (function () {
 
 function testReports() {
   var atl = getJiraOps();
-  //var report_boards = [157];
-  var report_boards = [1];
+  var report_boards = [157];
   
   var runner = new ReportRunner(atl);
   for (var i = 0; i < report_boards.length; i++) 
