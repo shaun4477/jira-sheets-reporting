@@ -20,5 +20,5 @@ We take no responsibility for your use of this service.
 
 ## Source code
 
-The source for the extension is at https://github.com/shaun4477/jira-sheets-reporting
+The source for the extension is at https://github.com/shaun4477/sheets-reporting-for-jira
 

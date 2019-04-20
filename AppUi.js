@@ -19,6 +19,12 @@ function onInstall() {
  */
 function boot() {
   makeMenu();
+}
+
+/** 
+ * Safe show sidebar
+ */
+function safeSidebar() {
   try {
     showSidebar();
   } catch (e) {
@@ -178,7 +184,7 @@ function generateReport(report_params) {
 function makeMenu() {  
   SpreadsheetApp.getUi().createMenu('Jira Reporting')
   //  .addItem('Login to Jira', 'loginToJiraModal')
-    .addItem('Show reporing sidebar', 'showSidebar')
+    .addItem('Run report', 'showSidebar')
     .addToUi();
 }
 
@@ -197,7 +203,7 @@ function showSidebar() {
   
   var template = sidebarTemplate.evaluate()
     .setSandboxMode(HtmlService.SandboxMode.NATIVE)
-    .setTitle('Jira Reporting')
+    .setTitle('Sprint Reporting')
     .setWidth(350)
     
   SpreadsheetApp.getUi().showSidebar(template);
